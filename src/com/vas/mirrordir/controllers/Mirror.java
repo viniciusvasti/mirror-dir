@@ -68,37 +68,49 @@ public class Mirror implements IMirror {
     //gonna be private with Java 9
     @Override
     public void reflect(File fileOrigin, File fileDestination) throws IOException {
-        // filtering only files on origin directory
-        Stream<File> filesInOrigin = Arrays.stream(fileOrigin.listFiles());
-        List<File> listFilesInOrigin = filesInOrigin.filter(f -> f.isFile()).collect(Collectors.toList());
-        // filtering only files on destination directory
-        Stream<File> filesInDestination = Arrays.stream(fileDestination.listFiles());
-        List<File> listFilesInDestination = filesInDestination.filter(f -> f.isFile()).collect(Collectors.toList());
-        filesInOrigin.close();
-        filesInDestination.close();
+        try {
+            // filtering only files on origin directory
+            List<File> listFilesInOrigin = Arrays.asList(fileOrigin.listFiles());
+            // filtering only files on destination directory
+            List<File> listFilesInDestination = Arrays.asList(fileDestination.listFiles());
 
-        // iterates over the origin directory comparing the files and adding or replacing it if necessary
-        for (File fileInOrigin : listFilesInOrigin) {
-            // setting the file that may exist in destination
-            File possibleFileInDestination = new File(fileDestination.getPath() + File.separator + fileInOrigin.getName());
-            // if its doesn't exist, copy from origin
-            if (!possibleFileInDestination.exists()) {
-                Files.copy(fileInOrigin.toPath(), possibleFileInDestination.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            } // comparing the last modified dates
-            else if (fileInOrigin.lastModified() > possibleFileInDestination.lastModified()) {
-                Files.copy(fileInOrigin.toPath(), possibleFileInDestination.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                // the listFilesInDestination will be used to delete files that don't exist on origin
-                // it had been modified implies that it hasn't to be deleted, we can remove it from listFilesInDestination
-                listFilesInDestination.remove(possibleFileInDestination);
+            // iterates over the origin directory comparing the files and adding or replacing it if necessary
+            for (File fileInOrigin : listFilesInOrigin) {
+                // setting the file that may exist in destination
+                File possibleFileInDestination = new File(fileDestination.getPath() + File.separator + fileInOrigin.getName());
+                // if its doesn't exist, copy from origin
+                if (!possibleFileInDestination.exists()) {
+                    Files.copy(fileInOrigin.toPath(), possibleFileInDestination.toPath());
+                    //if its a directory, then we need to reflect it too.
+                    if (possibleFileInDestination.isDirectory()) {
+                        reflect(fileInOrigin, possibleFileInDestination);
+                    }
+                } // verify if it was modified
+                else if (fileInOrigin.lastModified() > possibleFileInDestination.lastModified()) {
+                    //if its a directory, then we need to reflect it too.
+                    if (possibleFileInDestination.isDirectory()) {
+                        reflect(fileInOrigin, possibleFileInDestination);
+                    } else {
+                        Files.copy(fileInOrigin.toPath(), possibleFileInDestination.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    }
+                    // the listFilesInDestination will be used to delete files that don't exist on origin
+                    // it had been modified implies that it hasn't to be deleted, we can remove it from listFilesInDestination
+                    listFilesInDestination.remove(possibleFileInDestination);
+                } //If it is a directory, even if it isn't a new neither modified file, we need to verify the children
+                else if (possibleFileInDestination.isDirectory()) {
+                    reflect(fileInOrigin, possibleFileInDestination);
+                }
             }
-        }
 
-        // iterates over the destination directory comparing the files and excluding it if necessary 
-        for (File fileInDestination : listFilesInDestination) {
-            File possibleFileInOrigin = new File(fileOrigin.getPath() + File.separator + fileInDestination.getName());
-            if (!possibleFileInOrigin.exists()) {
-                fileInDestination.delete();
+            // iterates over the destination directory comparing the files and excluding it if necessary 
+            for (File fileInDestination : listFilesInDestination) {
+                File possibleFileInOrigin = new File(fileOrigin.getPath() + File.separator + fileInDestination.getName());
+                if (!possibleFileInOrigin.exists()) {
+                    fileInDestination.delete();
+                }
             }
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
         }
     }
 }
