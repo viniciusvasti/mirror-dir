@@ -1,5 +1,6 @@
 package com.vas.mirrordir;
 
+import com.vas.mirrordir.controllers.IMirror;
 import com.vas.mirrordir.controllers.Mirror;
 import com.vas.mirrordir.exceptions.NotADirectoryException;
 import java.io.IOException;
@@ -14,7 +15,7 @@ import java.util.logging.Logger;
 public class MirrorThread extends Thread {
 
     private final int reflectingFrequency;
-    private final Mirror mirror;
+    private final IMirror mirror;
 
     public MirrorThread(int reflectingFrequency, String pathOrigin, String pathDestination) throws NotADirectoryException, IOException {
         super("MirrorDir");
