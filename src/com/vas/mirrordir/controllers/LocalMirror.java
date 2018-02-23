@@ -19,12 +19,12 @@ import java.util.stream.Stream;
  *
  * @author Vinícius
  */
-public class Mirror implements IMirror {
+public class LocalMirror implements IMirror {
 
     private File dirOrigin;
     private File dirDestination;
 
-    public Mirror(String pathOrigin, String pathDestination) throws NotADirectoryException, IOException {
+    public LocalMirror(String pathOrigin, String pathDestination) throws NotADirectoryException, IOException {
         setPathOrigin(pathOrigin);
         setPathDestination(pathDestination);
     }

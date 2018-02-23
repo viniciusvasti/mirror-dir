@@ -15,7 +15,7 @@ import static org.junit.Assert.*;
  */
 public class MirrorTest {
     
-    private Mirror mirror;
+    private LocalMirror mirror;
     
     @BeforeClass
     public static void setUpClass() {    }
@@ -25,7 +25,7 @@ public class MirrorTest {
     
     @Before
     public void setUp() throws Exception {
-        mirror = new Mirror("C:\\Users\\Vinícius\\Desktop\\mirrorOrigin", "C:\\Users\\Vinícius\\Desktop\\mirrorDestination");
+        mirror = new LocalMirror("C:\\Users\\Vinícius\\Desktop\\mirrorOrigin", "C:\\Users\\Vinícius\\Desktop\\mirrorDestination");
     }
     
     @After
@@ -34,17 +34,17 @@ public class MirrorTest {
 
     @Test
     public void mirrorTest() throws Exception {
-        mirror = new Mirror("C:\\Users\\Vinícius\\Desktop\\mirrorOrigin", "C:\\Users\\Vinícius\\Desktop\\mirrorDestination");
+        mirror = new LocalMirror("C:\\Users\\Vinícius\\Desktop\\mirrorOrigin", "C:\\Users\\Vinícius\\Desktop\\mirrorDestination");
     }
 
     @Test(expected = NotADirectoryException.class)
     public void mirrorTestOriginDirdIsValid() throws NotADirectoryException, IOException {
-        mirror = new Mirror("C:\\Users\\Vinícius\\Desktop\\mirrorOrigi", "C:\\Users\\Vinícius\\Desktop\\mirrorDestination");
+        mirror = new LocalMirror("C:\\Users\\Vinícius\\Desktop\\mirrorOrigi", "C:\\Users\\Vinícius\\Desktop\\mirrorDestination");
     }
 
     @Test(expected = NotADirectoryException.class)
     public void mirrorTestDestinationDirIsValid() throws NotADirectoryException, IOException {
-        mirror = new Mirror("C:\\Users\\Vinícius\\Desktop\\mirrorOrigin", "C:\\Users\\Vinícius\\Desktop\\mirrorDestination.txt");
+        mirror = new LocalMirror("C:\\Users\\Vinícius\\Desktop\\mirrorOrigin", "C:\\Users\\Vinícius\\Desktop\\mirrorDestination.txt");
     }
     
     @Test
