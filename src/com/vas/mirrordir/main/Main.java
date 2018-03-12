@@ -2,7 +2,6 @@ package com.vas.mirrordir.main;
 
 import com.vas.mirrordir.MirrorThread;
 import com.vas.mirrordir.exceptions.NotADirectoryException;
-import com.vas.mirrordir.ftp.FTPConnection;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,7 +22,8 @@ public class Main {
     
     public static void runMirror() {
         try {
-            MirrorThread mirrorThread = new MirrorThread(10, "C:\\Users\\Vinícius\\Desktop\\mirrorOrigin", "C:\\Users\\Vinícius\\Desktop\\mirrorDestination");
+            //MirrorThread mirrorThread = new MirrorThread(10, "C:\\Users\\Vinícius\\Desktop\\mirrorOrigin", "C:\\Users\\Vinícius\\Desktop\\mirrorDestination");
+            MirrorThread mirrorThread = new MirrorThread(10, "C:\\Users\\Vinícius\\Desktop\\mirrorOrigin");
         } catch (NotADirectoryException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {

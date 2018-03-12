@@ -65,9 +65,7 @@ public class LocalMirror implements IMirror {
         reflect(this.dirOrigin, this.dirDestination);
     }
 
-    //gonna be private with Java 9
-    @Override
-    public void reflect(File fileOrigin, File fileDestination) throws IOException {
+    private void reflect(File fileOrigin, File fileDestination) throws IOException {
         try {
             // filtering only files on origin directory
             List<File> listFilesInOrigin = Arrays.asList(fileOrigin.listFiles());

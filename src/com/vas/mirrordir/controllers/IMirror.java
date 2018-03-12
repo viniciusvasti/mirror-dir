@@ -20,6 +20,4 @@ public interface IMirror {
     public void setPathDestination(String pathDestination) throws IOException, NotADirectoryException;
 
     public void reflect() throws IOException, NotADirectoryException;
-
-    public void reflect(File fileOrigin, File fileDestination) throws IOException;
 }

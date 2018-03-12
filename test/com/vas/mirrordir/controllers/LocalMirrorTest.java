@@ -13,7 +13,7 @@ import static org.junit.Assert.*;
  *
  * @author Vinícius
  */
-public class MirrorTest {
+public class LocalMirrorTest {
     
     private LocalMirror mirror;
     
