@@ -71,8 +71,11 @@ public class RemoteMirror implements IMirror {
             List<File> remoteFiles = ftpServer.getServerFiles();
             // iterates over the local directory comparing the files and adding or replacing it if necessary
             for (File localFile : localFiles) {
-                if (localFile.isFile() && !remoteFiles.contains(localFile)) {
-                    System.out.println(ftpServer.createFile(localFile));
+                if (localFile.isFile()) {
+                    String lastModifiedFile = ftpServer.lastModifiedFile(localFile);
+                    if (lastModifiedFile.substring(0, 3).equals("550")) {
+                        ftpServer.createFile(localFile);
+                    }
                 }
             }
         } catch (Exception ex) {
