@@ -52,14 +52,14 @@ public class FTPServer {
         sendCommand(usr);
         String reply = receiveReply();
         if (DEBUG) {
-            System.out.println("Sent USER - "+reply);
+            System.out.println("Sent USER - " + reply);
         }
         if (reply.startsWith("2")) {
             reply = receiveReply();
         }
-        
+
         if (DEBUG) {
-            System.out.println("Sent USER - "+reply);
+            System.out.println("Sent USER - " + reply);
         }
         if (!reply.startsWith("331 ")) {
             throw new Exception("Error: " + reply);
@@ -69,7 +69,7 @@ public class FTPServer {
         sendCommand(password);
         reply = receiveReply();
         if (DEBUG) {
-            System.out.println("Sent PASSWORD - "+reply);
+            System.out.println("Sent PASSWORD - " + reply);
         }
         if (!reply.startsWith("2")) {
             throw new Exception("Error: " + reply);
@@ -87,14 +87,14 @@ public class FTPServer {
             reply = receiveReply();
         }
         if (DEBUG) {
-            System.out.println("Requested File List - "+reply);
+            System.out.println("Requested File List - " + reply);
         }
         if (!reply.startsWith("2")) {
             throw new Exception("Error: " + reply);
         }
         reply = receiveReply(socket.getInputStream());
         if (DEBUG) {
-            System.out.println("Requested File List - "+reply);
+            System.out.println("Requested File List - " + reply);
         }
 
         if (!reply.isEmpty()) {
@@ -112,7 +112,7 @@ public class FTPServer {
             sendCommand("MDTM " + file.getName());
             String reply = receiveReply();
             if (DEBUG) {
-                System.out.println("Requested Last Modified - "+reply);
+                System.out.println("Requested Last Modified - " + reply);
             }
             if (!reply.startsWith("2")) {
                 return "";
@@ -134,7 +134,7 @@ public class FTPServer {
                 reply = receiveReply();
             }
             if (DEBUG) {
-                System.out.println("Sent STOR - "+reply);
+                System.out.println("Sent STOR - " + reply);
             }
             if (!reply.startsWith("2")) {
                 throw new Exception("Error: " + reply);
@@ -156,10 +156,29 @@ public class FTPServer {
 
     public boolean deleteFile(File file) {
         try {
-            return sendFTPCommand("DELE " + file.getName());
+            Socket socket = pasv();
+            sendCommand("DELE " + file.getName());
+            String reply = receiveReply();
+            // If the reply code starts with 1, wait for next reply
+            while (reply.startsWith("1")) {
+                reply = receiveReply();
+            }
+            if (DEBUG) {
+                System.out.println("Sent DELE - " + reply);
+            }
+            if (!reply.startsWith("2")) {
+                throw new Exception("Error: " + reply);
+            }
+            reply = receiveReply(socket.getInputStream());
+            if (DEBUG) {
+                System.out.println(reply);
+            }
+            return true;
         } catch (IOException ex) {
             Logger.getLogger(FTPServer.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InterruptedException ex) {
+            Logger.getLogger(FTPServer.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
             Logger.getLogger(FTPServer.class.getName()).log(Level.SEVERE, null, ex);
         }
         return false;
@@ -192,84 +211,32 @@ public class FTPServer {
 
     public boolean removeDirectory(File file) {
         try {
-            return sendFTPCommand("RMD " + file.getName());
+            Socket socket = pasv();
+            sendCommand("RMD " + file.getName());
+            String reply = receiveReply();
+            // If the reply code starts with 1, wait for next reply
+            while (reply.startsWith("1")) {
+                reply = receiveReply();
+            }
+            if (DEBUG) {
+                System.out.println("Sent DELE - " + reply);
+            }
+            if (!reply.startsWith("2")) {
+                throw new Exception("Error: " + reply);
+            }
+            reply = receiveReply(socket.getInputStream());
+            if (DEBUG) {
+                System.out.println(reply);
+            }
+            return true;
         } catch (IOException ex) {
             Logger.getLogger(FTPServer.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InterruptedException ex) {
             Logger.getLogger(FTPServer.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(FTPServer.class.getName()).log(Level.SEVERE, null, ex);
         }
         return false;
-    }
-
-    @Deprecated
-    private boolean sendFTPCommand(String command) throws IOException, InterruptedException {
-        String resp = pasvOld();
-        Address addr = getIPandPort(resp);
-
-        Socket data = new Socket(addr.getIp(), addr.getPort());
-        InputStream dataIn = data.getInputStream();
-        command += "\r\n";
-        outputStream.write(command.getBytes());
-        outputStream.flush();
-        String reply = "";
-        do {
-            // getting FTP reply
-            reply = getReply(inputStream);
-            // if the cod starts with 1, wait for another reply
-        } while (!reply.isEmpty() && reply.charAt(0) == '1');
-        if (reply.charAt(0) != '2') {
-            System.out.println("ERRO: " + reply);
-        }
-        // return true if the cod starts with 2
-        return reply.charAt(0) == '2';
-    }
-
-    @Deprecated
-    private String sendFTPCommandWithReply(String command) throws IOException, InterruptedException {
-        String resp = pasvOld();
-        Address addr = getIPandPort(resp);
-
-        Socket data = new Socket(addr.getIp(), addr.getPort());
-        InputStream dataIn = data.getInputStream();
-        command += "\r\n";
-        outputStream.write(command.getBytes());
-        outputStream.flush();
-        String reply = "";
-        do {
-            // getting FTP reply
-            reply = getReply(inputStream);
-            // if the cod starts with 1, wait for another reply
-        } while (!reply.isEmpty() && reply.charAt(0) == '1');
-        return reply;
-    }
-
-    public String getReply(InputStream inputStream) throws IOException, InterruptedException {
-        ArrayList<String> replyArray = new ArrayList<>();
-        String s = "";
-        do {
-            byte[] buff = new byte[5000];
-            inputStream.read(buff);
-            replyArray.add(new String(buff).trim());
-            Thread.sleep(1000);
-        } while (inputStream.available() != 0);
-        for (String str : replyArray) {
-            s += str + "\n";
-        }
-        return s.trim();
-    }
-
-    @Deprecated
-    private String pasvOld() throws IOException, InterruptedException {
-        String resp = "PASV" + "\r\n";
-        outputStream.write(resp.getBytes());
-        outputStream.flush();
-        do {
-            byte[] buff = new byte[10000];
-            inputStream.read(buff);
-            resp = new String(buff);
-            System.out.println(resp.trim());
-        } while (inputStream.available() > 0);
-        return resp;
     }
 
     //gonna be private
