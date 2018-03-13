@@ -70,7 +70,7 @@ public class RemoteMirror extends AbstractMirror {
         try {
             // filtering only files on origin directory
             List<File> localFiles = Arrays.asList(fileOrigin.listFiles());
-            List<File> remoteFiles = new ArrayList<>();//ftpServer.getServerFiles();
+            List<File> remoteFiles = ftpServer.getServerFiles();
             String lastModifiedFile = "";
             // iterates over the local directory comparing the files and adding or replacing it if necessary
             for (File localFile : localFiles) {

@@ -128,6 +128,7 @@ public class FTPServer {
         return false;
     }
 
+    @Deprecated
     private boolean sendFTPCommand(String command) throws IOException, InterruptedException {
         String resp = pasv();
         Address addr = getIPandPort(resp);
@@ -144,12 +145,13 @@ public class FTPServer {
             // if the cod starts with 1, wait for another reply
         } while (!reply.isEmpty() && reply.charAt(0) == '1');
         if (reply.charAt(0) != '2') {
-            System.out.println("ERRO: "+reply);
+            System.out.println("ERRO: " + reply);
         }
         // return true if the cod starts with 2
         return reply.charAt(0) == '2';
     }
 
+    @Deprecated
     private String sendFTPCommandWithReply(String command) throws IOException, InterruptedException {
         String resp = pasv();
         Address addr = getIPandPort(resp);
@@ -196,7 +198,8 @@ public class FTPServer {
         return resp;
     }
 
-    private Address getIPandPort(String resp) {
+    //gonna be private
+    public Address getIPandPort(String resp) {
         StringTokenizer st = new StringTokenizer(resp);
         st.nextToken("(");
         String ip = st.nextToken(",").substring(1) + "."
@@ -208,5 +211,38 @@ public class FTPServer {
         int port = value1 * 256 + value2;
         Address addr = new Address(ip, port);
         return addr;
+    }
+
+    //gonna be private
+    public void sendCommand(String command) {
+        command += "\r\n";
+        try {
+            outputStream.write(command.getBytes());
+            outputStream.flush();
+        } catch (IOException ex) {
+            Logger.getLogger(FTPServer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    //gonna be private
+    public String receiveReply() {
+        byte[] buff = new byte[10000];
+        try {
+            inputStream.read(buff);
+        } catch (IOException ex) {
+            Logger.getLogger(FTPServer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return new String(buff).trim();
+    }
+    
+    //gonna be private
+    public String receiveReply(InputStream inputStream) {
+        byte[] buff = new byte[10000];
+        try {
+            inputStream.read(buff);
+        } catch (IOException ex) {
+            Logger.getLogger(FTPServer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return new String(buff).trim();
     }
 }
