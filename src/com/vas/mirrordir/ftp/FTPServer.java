@@ -50,33 +50,18 @@ public class FTPServer {
         String usr = "USER vinicius.vas.ti" + "\r\n";
         outputStream.write(usr.getBytes());
 
-        System.out.println(getResponse(inputStream));
+        System.out.println(getReply(inputStream));
 
         String password = "PASS 123456" + "\r\n";
         outputStream.write(password.getBytes());
-        String response = getResponse(inputStream);
-        System.out.println(response);
-        return response;
-    }
-
-    public String getResponse(InputStream cmdIn) throws IOException, InterruptedException {
-        ArrayList<String> responseArray = new ArrayList<>();
-        String s = "";
-        do {
-            byte[] buff = new byte[5000];
-            cmdIn.read(buff);
-            responseArray.add(new String(buff).trim());
-            Thread.sleep(1000);
-        } while (cmdIn.available() != 0);
-        for (String str : responseArray) {
-            s += str + "\n";
-        }
-        return s.trim();
+        String reply = getReply(inputStream);
+        System.out.println(reply);
+        return reply;
     }
 
     public List<File> getServerFiles() throws IOException, InterruptedException {
         List<File> serverFiles = new ArrayList<>();
-        String str = receiveFTPCommand("NLST");
+        String str = sendFTPCommandWithReply("NLST");
 
         if (!str.isEmpty()) {
             String[] lista = str.split("\\n");
@@ -88,91 +73,114 @@ public class FTPServer {
         return serverFiles;
     }
 
-    public String createFile(File file) {
-        String response = "";
+    public boolean createFile(File file) {
         try {
-            response = sendFTPCommand("STOR "+file.getName());
+            return sendFTPCommand("STOR " + file.getName());
         } catch (IOException ex) {
             Logger.getLogger(FTPServer.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InterruptedException ex) {
             Logger.getLogger(FTPServer.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return response;
+        return false;
     }
 
-    public String deleteFile(File file) {
-        String response = "";
+    public boolean deleteFile(File file) {
         try {
-            response = sendFTPCommand("DELE "+file.getName());
+            return sendFTPCommand("DELE " + file.getName());
         } catch (IOException ex) {
             Logger.getLogger(FTPServer.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InterruptedException ex) {
             Logger.getLogger(FTPServer.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return response;
+        return false;
     }
 
     public String lastModifiedFile(File file) {
-        String response = "";
         try {
-            response = sendFTPCommand("MDTM "+file.getName());
+            return sendFTPCommandWithReply("MDTM " + file.getName());
         } catch (IOException ex) {
             Logger.getLogger(FTPServer.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InterruptedException ex) {
             Logger.getLogger(FTPServer.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return response;
+        return "425";
     }
 
-    public String createDirectory(File file) {
-        String response = "";
+    public boolean createDirectory(File file) {
         try {
-            response = sendFTPCommand("MKD "+file.getName());
+            return sendFTPCommand("MKD " + file.getName());
         } catch (IOException ex) {
             Logger.getLogger(FTPServer.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InterruptedException ex) {
             Logger.getLogger(FTPServer.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return response;
+        return false;
     }
 
-    public String removeDirectory(File file) {
-        String response = "";
+    public boolean removeDirectory(File file) {
         try {
-            response = sendFTPCommand("RMD "+file.getName());
+            return sendFTPCommand("RMD " + file.getName());
         } catch (IOException ex) {
             Logger.getLogger(FTPServer.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InterruptedException ex) {
             Logger.getLogger(FTPServer.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return response;
+        return false;
     }
 
-    private String sendFTPCommand(String command) throws IOException, InterruptedException {
+    private boolean sendFTPCommand(String command) throws IOException, InterruptedException {
         String resp = pasv();
         Address addr = getIPandPort(resp);
 
         Socket data = new Socket(addr.getIp(), addr.getPort());
         InputStream dataIn = data.getInputStream();
-        
         command += "\r\n";
         outputStream.write(command.getBytes());
         outputStream.flush();
-        return getResponse(inputStream);
+        String reply = "";
+        do {
+            // getting FTP reply
+            reply = getReply(inputStream);
+            // if the cod starts with 1, wait for another reply
+        } while (!reply.isEmpty() && reply.charAt(0) == '1');
+        if (reply.charAt(0) != '2') {
+            System.out.println("ERRO: "+reply);
+        }
+        // return true if the cod starts with 2
+        return reply.charAt(0) == '2';
     }
 
-    private String receiveFTPCommand(String command) throws IOException, InterruptedException {
+    private String sendFTPCommandWithReply(String command) throws IOException, InterruptedException {
         String resp = pasv();
         Address addr = getIPandPort(resp);
 
         Socket data = new Socket(addr.getIp(), addr.getPort());
         InputStream dataIn = data.getInputStream();
-
         command += "\r\n";
         outputStream.write(command.getBytes());
-        getResponse(inputStream);
+        outputStream.flush();
+        String reply = "";
+        do {
+            // getting FTP reply
+            reply = getReply(inputStream);
+            // if the cod starts with 1, wait for another reply
+        } while (!reply.isEmpty() && reply.charAt(0) == '1');
+        return reply;
+    }
 
-        return getResponse(dataIn);
+    public String getReply(InputStream inputStream) throws IOException, InterruptedException {
+        ArrayList<String> replyArray = new ArrayList<>();
+        String s = "";
+        do {
+            byte[] buff = new byte[5000];
+            inputStream.read(buff);
+            replyArray.add(new String(buff).trim());
+            Thread.sleep(1000);
+        } while (inputStream.available() != 0);
+        for (String str : replyArray) {
+            s += str + "\n";
+        }
+        return s.trim();
     }
 
     private String pasv() throws IOException, InterruptedException {

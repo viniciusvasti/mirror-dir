@@ -38,13 +38,6 @@ public class FTPServerTest {
     }
 
     @Test
-    public void pasv() throws Exception {
-        ftpConn.connect();
-        String resposta = ftpConn.pasv();
-        Assert.assertNotEquals(resposta,"");
-    }
-
-    @Test
     public void makeDir() throws Exception {
         ftpConn.connect();
         ftpConn.getServerFiles();

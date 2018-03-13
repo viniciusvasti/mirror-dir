@@ -19,7 +19,7 @@ import java.util.stream.Stream;
  *
  * @author Vinícius
  */
-public class LocalMirror implements IMirror {
+public class LocalMirror extends AbstractMirror {
 
     private File dirOrigin;
     private File dirDestination;
@@ -29,7 +29,6 @@ public class LocalMirror implements IMirror {
         setPathDestination(pathDestination);
     }
 
-    //gonna be private with Java 9
     @Override
     public void setPathOrigin(String pathOrigin) throws NotADirectoryException {
         File fileOrigin = new File(pathOrigin);
@@ -42,6 +41,7 @@ public class LocalMirror implements IMirror {
         this.dirOrigin = fileOrigin;
     }
 
+    @Override
     public void setPathDestination(String pathDestination) throws IOException, NotADirectoryException {
         File fileDestination = new File(pathDestination);
         if (!fileDestination.exists()) {
