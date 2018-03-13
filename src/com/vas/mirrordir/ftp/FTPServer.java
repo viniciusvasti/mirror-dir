@@ -176,7 +176,7 @@ public class FTPServer {
             if (DEBUG) {
                 System.out.println(reply);
             }
-            if (!reply.startsWith("2")) {
+            if (!reply.startsWith("2") && !reply.startsWith("550")) {
                 throw new Exception("Error: " + reply);
             }
             return true;
