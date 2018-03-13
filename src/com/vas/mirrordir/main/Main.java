@@ -22,28 +22,8 @@ public class Main {
      */
     public static void main(String[] args) {
         try {
-            String response = "";
-            FTPServer ftpServer = new FTPServer();
-            ftpServer.connect();
-            ftpServer.sendCommand("PWD");
-            response = ftpServer.receiveReply();
-            System.out.println("Main: "+response);
-            
-            ftpServer.sendCommand("PASV");
-            response = ftpServer.receiveReply();
-            System.out.println("Main: "+response);
-            
-            Address address = ftpServer.getIPandPort(response);
-            Socket data = new Socket(address.getIp(), address.getPort());
-            ftpServer.sendCommand("NLST");
-            response = ftpServer.receiveReply();
-            System.out.println("Main: "+response);
-            response = ftpServer.receiveReply(data.getInputStream());
-            System.out.println("Main: "+response);
-            //runMirror();
-        } catch (IOException ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InterruptedException ex) {
+            runMirror();
+        } catch (Exception ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
@@ -51,7 +31,7 @@ public class Main {
     public static void runMirror() {
         try {
             //MirrorThread mirrorThread = new MirrorThread(10, "C:\\Users\\Vinicius\\Desktop\\mirrorOrigin", "C:\\Users\\Vinicius\\Desktop\\mirrorDestination");
-            MirrorThread mirrorThread = new MirrorThread(60, "C:\\Users\\Vinicius\\Desktop\\mirrorOrigin");
+            MirrorThread mirrorThread = new MirrorThread(60, "C:\\Users\\Vinícius\\Desktop\\mirrorOrigin");
         } catch (NotADirectoryException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {

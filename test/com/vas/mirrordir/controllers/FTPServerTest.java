@@ -33,8 +33,7 @@ public class FTPServerTest {
 
     @Test
     public void connect() throws Exception {
-        String resposta = ftpConn.connect();
-        Assert.assertNotEquals(resposta,"");
+        Assert.assertEquals(ftpConn.connect(),true);
     }
 
     @Test

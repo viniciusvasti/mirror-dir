@@ -61,6 +61,8 @@ public class RemoteMirror extends AbstractMirror {
             reflect(dirOrigin);
         } catch (InterruptedException ex) {
             Logger.getLogger(RemoteMirror.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(RemoteMirror.class.getName()).log(Level.SEVERE, null, ex);
         }
         System.out.println("Finish reflecting...");
         running = false;
@@ -76,11 +78,11 @@ public class RemoteMirror extends AbstractMirror {
             for (File localFile : localFiles) {
                 if (localFile.isFile()) {
                     lastModifiedFile = ftpServer.lastModifiedFile(localFile);
-                    if (lastModifiedFile.substring(0, 3).equals("550")) {
+                    if (lastModifiedFile.isEmpty()) {
                         ftpServer.createFile(localFile);
                     }
                 } else {
-                    ftpServer.createDirectory(localFile);
+                    boolean created = ftpServer.createDirectory(localFile);
                 }
             }
 
