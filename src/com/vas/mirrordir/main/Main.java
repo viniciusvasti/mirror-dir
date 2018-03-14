@@ -31,7 +31,7 @@ public class Main {
     public static void runMirror() {
         try {
             //MirrorThread mirrorThread = new MirrorThread(10, "C:\\Users\\Vinicius\\Desktop\\mirrorOrigin", "C:\\Users\\Vinicius\\Desktop\\mirrorDestination");
-            MirrorThread mirrorThread = new MirrorThread(60, "C:\\Users\\Vinícius\\Desktop\\mirrorOrigin");
+            MirrorThread mirrorThread = new MirrorThread(60, "C:\\Users\\Vinicius\\Desktop\\mirrorOrigin");
         } catch (NotADirectoryException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {

@@ -10,9 +10,9 @@ import com.vas.mirrordir.ftp.FTPServer;
 import java.io.File;
 import java.io.IOException;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,13 +22,14 @@ import java.util.logging.Logger;
  */
 public class RemoteMirror extends AbstractMirror {
 
-    private File dirOrigin;
-    private File dirDestination;
+    private File localDir;
     private FTPServer ftpServer;
+    Stack<File> directoryStack;
 
     public RemoteMirror(String pathOrigin) throws NotADirectoryException, IOException {
         setPathOrigin(pathOrigin);
         ftpServer = new FTPServer();
+        directoryStack = new Stack<>();
     }
 
     //gonna be private with Java 9
@@ -41,7 +42,7 @@ public class RemoteMirror extends AbstractMirror {
         if (!fileOrigin.isDirectory()) {
             throw new NotADirectoryException("The origin path is a file. It need to be a directory.");
         }
-        this.dirOrigin = fileOrigin;
+        this.localDir = fileOrigin;
     }
 
     @Override
@@ -53,12 +54,16 @@ public class RemoteMirror extends AbstractMirror {
     public void reflect() throws IOException, NotADirectoryException, UnknownHostException {
         System.out.println("Start reflecting...");
         running = true;
-        if (!this.dirOrigin.exists()) {
+        if (!this.localDir.exists()) {
             throw new NotADirectoryException("The origin path doesn't exists.");
         }
         try {
-            ftpServer.connect();
-            reflect(dirOrigin);
+            if (ftpServer.connect()) {
+                reflectDir();
+                ftpServer.disconnect();
+            } else {
+                throw new Exception("Can't stablish connection with server");
+            }
         } catch (InterruptedException ex) {
             Logger.getLogger(RemoteMirror.class.getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
@@ -68,33 +73,51 @@ public class RemoteMirror extends AbstractMirror {
         running = false;
     }
 
-    public void reflect(File fileOrigin) throws IOException {
-        try {
-            // filtering only files on origin directory
-            List<File> localFiles = Arrays.asList(fileOrigin.listFiles());
-            List<File> remoteFiles = ftpServer.getServerFiles();
-            String lastModifiedFile = "";
-            // iterates over the local directory comparing the files and adding or replacing it if necessary
-            for (File localFile : localFiles) {
-                if (localFile.isFile()) {
-                    lastModifiedFile = ftpServer.lastModifiedFile(localFile);
-                    if (lastModifiedFile.isEmpty()) {
-                        ftpServer.createFile(localFile);
-                    }
-                } else {
-                    boolean created = ftpServer.createDirectory(localFile);
+    public void reflectDir() throws IOException {
+        try {            
+            directoryStack.push(localDir);
+            do {
+                File currentFile = directoryStack.pop();
+                // getting a list of files on local directory
+                List<File> localFiles = Arrays.asList(currentFile.listFiles());
+                if (!currentFile.equals(localDir)) {
+                    String path = currentFile.getAbsolutePath().replace(localDir.getAbsolutePath(), "");
+                    ftpServer.changeDirectory(path);
                 }
-            }
+                List<File> remoteFiles = ftpServer.getServerFiles();
+                // iterates over the local directory comparing the files and adding or replacing it if necessary
+                for (File localFile : localFiles) {
+                    createFileOrDirectoryIfNecessary(localFile);
+                }
 
-            // iterates over the destination directory comparing the files and excluding it if necessary 
-            for (File remoteFile : remoteFiles) {
-                File possibleFileInOrigin = new File(fileOrigin.getPath() + File.separator + remoteFile.getName());
-                if (!possibleFileInOrigin.exists()) {
-                    ftpServer.createFile(remoteFile);
+                // iterates over the remote directory comparing the files and excluding it if necessary 
+                for (File remoteFile : remoteFiles) {
+                    deleteFileOrDirectoryIfNecessary(currentFile, remoteFile);
                 }
-            }
+            } while (!directoryStack.isEmpty());
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
+        }
+    }
+
+    private void createFileOrDirectoryIfNecessary(File localFile) {
+        String lastModifiedFile = "";
+        if (localFile.isFile()) {
+            lastModifiedFile = ftpServer.lastModifiedFile(localFile);
+            if (lastModifiedFile.isEmpty()) {
+                ftpServer.createFile(localFile);
+            }
+        } else {
+            ftpServer.createDirectory(localFile);
+            directoryStack.push(localFile);
+        }
+    }
+
+    private void deleteFileOrDirectoryIfNecessary(File localFile, File remoteFile) {
+        File possibleLocalFile = new File(localFile.getPath() + File.separator + remoteFile.getName());
+        if (!possibleLocalFile.exists()) {
+            ftpServer.deleteFile(remoteFile);
+            ftpServer.removeDirectory(remoteFile);
         }
     }
 }
