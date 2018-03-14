@@ -20,10 +20,10 @@ import java.util.logging.Logger;
  *
  * @author Vinícius
  */
-public class RemoteMirror extends AbstractMirror {
+public final class RemoteMirror extends AbstractMirror {
 
     private File localDir;
-    private FTPServer ftpServer;
+    private final FTPServer ftpServer;
     Stack<File> directoryStack;
 
     public RemoteMirror(String pathOrigin) throws NotADirectoryException, IOException {
@@ -86,14 +86,14 @@ public class RemoteMirror extends AbstractMirror {
                 }
                 List<File> remoteFiles = ftpServer.getServerFiles();
                 // iterates over the local directory comparing the files and adding or replacing it if necessary
-                for (File localFile : localFiles) {
+                localFiles.forEach((localFile) -> {
                     createFileOrDirectoryIfNecessary(localFile);
-                }
+                });
 
                 // iterates over the remote directory comparing the files and excluding it if necessary 
-                for (File remoteFile : remoteFiles) {
+                remoteFiles.forEach((remoteFile) -> {
                     deleteFileOrDirectoryIfNecessary(currentFile, remoteFile);
-                }
+                });
             } while (!directoryStack.isEmpty());
         } catch (Exception ex) {
             System.out.println(ex.getMessage());

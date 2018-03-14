@@ -10,7 +10,6 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -96,33 +95,33 @@ public class FTPServer {
 
     public List<File> getServerFiles() throws IOException, InterruptedException, Exception {
         List<File> serverFiles = new ArrayList<>();
-        Socket passiveSocket = pasv();
-        sendCommand("NLST");
-        String reply = receiveReply();
-        // If the reply code starts with 1, wait for next reply
-        while (reply.startsWith("1")) {
-            reply = receiveReply();
-        }
-        if (DEBUG) {
-            System.out.println("Requested File List - " + reply);
-        }
-        if (!reply.startsWith("2")) {
-            passiveSocket.close();
-            throw new Exception("Error: " + reply);
-        }
-        reply = receiveReply(passiveSocket.getInputStream());
-        if (DEBUG) {
-            System.out.println("Requested File List - " + reply);
-        }
-
-        if (!reply.isEmpty()) {
-            String[] lista = reply.split("\\n");
-
-            for (String url : lista) {
-                serverFiles.add(new File(url.trim()));
+        try (Socket passiveSocket = pasv()) {
+            sendCommand("NLST");
+            String reply = receiveReply();
+            // If the reply code starts with 1, wait for next reply
+            while (reply.startsWith("1")) {
+                reply = receiveReply();
+            }
+            if (DEBUG) {
+                System.out.println("Requested File List - " + reply);
+            }
+            if (!reply.startsWith("2")) {
+                passiveSocket.close();
+                throw new Exception("Error: " + reply);
+            }
+            reply = receiveReply(passiveSocket.getInputStream());
+            if (DEBUG) {
+                System.out.println("Requested File List - " + reply);
+            }
+            
+            if (!reply.isEmpty()) {
+                String[] lista = reply.split("\\n");
+                
+                for (String url : lista) {
+                    serverFiles.add(new File(url.trim()));
+                }
             }
         }
-        passiveSocket.close();
         return serverFiles;
     }
 
@@ -158,36 +157,36 @@ public class FTPServer {
     public boolean createFile(File file) {
         try {
             toBinaryMode();
-            Socket passiveSocket = pasv();
-            sendCommand("STOR " + file.getName());
-            String reply = receiveReply();
-
-            if (DEBUG) {
-                System.out.println("Sent STOR - " + reply);
-            }
-            if (!reply.startsWith("1")) {
-                passiveSocket.close();
-                throw new Exception("Error: " + reply);
-            }
-
-            InputStream fileInputStream = new FileInputStream(file);
-            OutputStream fileOutputStream = passiveSocket.getOutputStream();
-            byte[] buffer = new byte[4096];
-            int bytesRead;
-            while ((bytesRead = fileInputStream.read(buffer)) != -1) {
-                fileOutputStream.write(buffer);
-            }
-            fileOutputStream.flush();
-
-            reply = receiveReply();
+            try (Socket passiveSocket = pasv()) {
+                sendCommand("STOR " + file.getName());
+                String reply = receiveReply();
+                
+                if (DEBUG) {
+                    System.out.println("Sent STOR - " + reply);
+                }
+                if (!reply.startsWith("1")) {
+                    passiveSocket.close();
+                    throw new Exception("Error: " + reply);
+                }
+                
+                InputStream fileInputStream = new FileInputStream(file);
+                OutputStream fileOutputStream = passiveSocket.getOutputStream();
+                byte[] buffer = new byte[4096];
+                int bytesRead;
+                while ((bytesRead = fileInputStream.read(buffer)) != -1) {
+                    fileOutputStream.write(buffer);
+                }
+                fileOutputStream.flush();
+                
+                reply = receiveReply();
 //            if (!reply.startsWith("2")) {
 //                passiveSocket.close();
 //                throw new Exception("Error: " + reply);
 //            }
-            if (DEBUG) {
-                System.out.println(reply);
+if (DEBUG) {
+    System.out.println(reply);
+}
             }
-            passiveSocket.close();
             return true;
         } catch (IOException ex) {
             Logger.getLogger(FTPServer.class.getName()).log(Level.SEVERE, null, ex);
@@ -201,21 +200,21 @@ public class FTPServer {
 
     public boolean deleteFile(File file) {
         try {
-            Socket passiveSocket = pasv();
-            sendCommand("DELE " + file.getName());
-            String reply = receiveReply();
-            // If the reply code starts with 1, wait for next reply
-            while (reply.startsWith("1")) {
-                reply = receiveReply();
+            try (Socket passiveSocket = pasv()) {
+                sendCommand("DELE " + file.getName());
+                String reply = receiveReply();
+                // If the reply code starts with 1, wait for next reply
+                while (reply.startsWith("1")) {
+                    reply = receiveReply();
+                }
+                if (DEBUG) {
+                    System.out.println("Sent DELE - " + reply);
+                }
+                if (!reply.startsWith("2")) {
+                    passiveSocket.close();
+                    throw new Exception("Error: " + reply);
+                }
             }
-            if (DEBUG) {
-                System.out.println("Sent DELE - " + reply);
-            }
-            if (!reply.startsWith("2")) {
-                passiveSocket.close();
-                throw new Exception("Error: " + reply);
-            }
-            passiveSocket.close();
             return true;
         } catch (IOException ex) {
             Logger.getLogger(FTPServer.class.getName()).log(Level.SEVERE, null, ex);
@@ -254,24 +253,24 @@ public class FTPServer {
 
     public boolean removeDirectory(File file) {
         try {
-            Socket passiveSocket = pasv();
-            sendCommand("RMD " + file.getName());
-            String reply = receiveReply();
-            // If the reply code starts with 1, wait for next reply
-            while (reply.startsWith("1")) {
-                reply = receiveReply();
+            try (Socket passiveSocket = pasv()) {
+                sendCommand("RMD " + file.getName());
+                String reply = receiveReply();
+                // If the reply code starts with 1, wait for next reply
+                while (reply.startsWith("1")) {
+                    reply = receiveReply();
+                }
+                if (DEBUG) {
+                    System.out.println("Sent DELE - " + reply);
+                }
+                if (!reply.startsWith("2")) {
+                    System.out.println("Error: " + reply);
+                }
+                reply = receiveReply(passiveSocket.getInputStream());
+                if (DEBUG) {
+                    System.out.println(reply);
+                }
             }
-            if (DEBUG) {
-                System.out.println("Sent DELE - " + reply);
-            }
-            if (!reply.startsWith("2")) {
-                System.out.println("Error: " + reply);
-            }
-            reply = receiveReply(passiveSocket.getInputStream());
-            if (DEBUG) {
-                System.out.println(reply);
-            }
-            passiveSocket.close();
             return true;
         } catch (IOException ex) {
             Logger.getLogger(FTPServer.class.getName()).log(Level.SEVERE, null, ex);
