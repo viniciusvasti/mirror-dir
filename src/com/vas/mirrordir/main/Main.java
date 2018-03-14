@@ -4,6 +4,7 @@ import com.vas.mirrordir.MirrorThread;
 import com.vas.mirrordir.exceptions.NotADirectoryException;
 import com.vas.mirrordir.models.FTPCredentials;
 import java.io.IOException;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -13,15 +14,27 @@ import java.util.logging.Logger;
  */
 public class Main {
 
+    private static String originPath;
+    private static String domain;
+    private static String user;
+    private static String password;
+
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        try {
-            runMirror();
-        } catch (Exception ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("### MirrorDir config ###");
+        System.out.println("Local directory (e.g. C:\\Vinicius\\Documents\\DirectoryToMirror): ");
+        originPath = scanner.next();
+        System.out.println("FTP domain (e.g. ftp.drivehq.com): ");
+        domain = scanner.next();
+        System.out.println("FTP user: ");
+        user = scanner.next();
+        System.out.println("FTP password: ");
+        password = scanner.next();
+        System.out.println("### MirrorDir config ###");
+        runMirror();
     }
 
     public static void runMirror() {
@@ -29,8 +42,8 @@ public class Main {
             //MirrorThread mirrorThread = new MirrorThread(10, "C:\\Users\\Vinicius\\Desktop\\mirrorOrigin", "C:\\Users\\Vinicius\\Desktop\\mirrorDestination");
             MirrorThread mirrorThread = new MirrorThread(
                     60,
-                    "C:\\Users\\Vinícius\\Desktop\\mirrorOrigin",
-                    new FTPCredentials("ftp.drivehq.com", "vinicius.vas.ti", "123456")
+                    originPath,
+                    new FTPCredentials(domain, user, password)
             );
         } catch (NotADirectoryException | IOException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);

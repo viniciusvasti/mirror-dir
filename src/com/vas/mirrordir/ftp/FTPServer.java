@@ -231,7 +231,7 @@ public class FTPServer {
             String reply = receiveReply();
             if (!reply.startsWith("2")) {
                 passiveSocket.close();
-                System.out.println("Error sending DELE: " + reply);
+                //System.out.println("Error sending DELE: " + reply);
                 return false;
             }
             return true;
@@ -273,7 +273,7 @@ public class FTPServer {
             sendCommand("RMD " + file.getName());
             String reply = receiveReply();
             if (!reply.startsWith("2")) {
-                System.out.println("Error sending RMD: " + reply);
+                //System.out.println("Error sending RMD: " + reply);
                 return false;
             }
         }
