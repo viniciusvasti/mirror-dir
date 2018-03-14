@@ -1,6 +1,7 @@
 package com.vas.mirrordir.ftp;
 
 import com.vas.mirrordir.models.Address;
+import com.vas.mirrordir.models.FTPCredentials;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -40,16 +41,18 @@ public class FTPServer {
     private InputStream inputStream;
     private OutputStream outputStream;
     private final boolean DEBUG = true;
+    private FTPCredentials credentials;
 
-    public FTPServer() throws IOException {
+    public FTPServer(FTPCredentials credentials) {
+        this.credentials = credentials;
     }
 
     public boolean connect() throws UnknownHostException, IOException, InterruptedException, Exception {
-        socket = new Socket("ftp.drivehq.com", 21);
+        socket = new Socket(credentials.getDomain(), credentials.getPort());
         inputStream = socket.getInputStream();
         outputStream = socket.getOutputStream();
 
-        String usr = "USER vinicius.vas.ti" + "\r\n";
+        String usr = "USER "+credentials.getUser() + "\r\n";
         sendCommand(usr);
         String reply = receiveReply();
         if (reply.startsWith("2")) {
@@ -59,7 +62,7 @@ public class FTPServer {
             throw new Exception("Error: " + reply);
         }
 
-        String password = "PASS 123456";
+        String password = "PASS "+credentials.getPassword();
         sendCommand(password);
         reply = receiveReply();
         if (!reply.startsWith("2")) {

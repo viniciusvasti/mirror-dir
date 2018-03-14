@@ -2,6 +2,7 @@ package com.vas.mirrordir.controllers;
 
 import com.vas.mirrordir.exceptions.NotADirectoryException;
 import com.vas.mirrordir.ftp.FTPServer;
+import com.vas.mirrordir.models.FTPCredentials;
 import java.io.File;
 import java.io.IOException;
 import java.net.UnknownHostException;
@@ -27,7 +28,7 @@ public final class RemoteMirror implements IMirror {
 
     public RemoteMirror(String pathOrigin) throws NotADirectoryException, IOException {
         setOriginPath(pathOrigin);
-        ftpServer = new FTPServer();
+        ftpServer = new FTPServer(new FTPCredentials("ftp.drivehq.com", "vinicius.vas.ti", "123456"));
         directoryStack = new Stack<>();
     }
 

@@ -19,16 +19,16 @@ public class Address {
     public Address(String respPASV) {
         StringTokenizer st = new StringTokenizer(respPASV);
         st.nextToken("(");
-        String ip = st.nextToken(",").substring(1) + "."
+        String Address = st.nextToken(",").substring(1) + "."
                 + st.nextToken(",") + "."
                 + st.nextToken(",") + "."
                 + st.nextToken(",");
         int value1 = Integer.parseInt(st.nextToken(","));
         int value2 = Integer.parseInt(st.nextToken(")").substring(1));
-        int port = value1 * 256 + value2;
+        int portAddress = value1 * 256 + value2;
 
-        this.ip = ip;
-        this.port = port;
+        this.ip = Address;
+        this.port = portAddress;
     }
 
     public String getIp() {
