@@ -9,7 +9,6 @@ import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Stack;
 import java.util.logging.Level;
@@ -26,9 +25,16 @@ public final class RemoteMirror implements IMirror {
     private final FTPServer ftpServer;
     Stack<File> directoryStack;
 
-    public RemoteMirror(String pathOrigin) throws NotADirectoryException, IOException {
+    /**
+     * Constructor
+     * @param pathOrigin indicates the local directory path
+     * @param credentials credentials to stablish connection to FTP server
+     * @throws NotADirectoryException
+     * @throws IOException 
+     */
+    public RemoteMirror(String pathOrigin, FTPCredentials credentials) throws NotADirectoryException, IOException {
         setOriginPath(pathOrigin);
-        ftpServer = new FTPServer(new FTPCredentials("ftp.drivehq.com", "vinicius.vas.ti", "123456"));
+        ftpServer = new FTPServer(credentials);
         directoryStack = new Stack<>();
     }
 
@@ -98,8 +104,8 @@ public final class RemoteMirror implements IMirror {
                 if (lastModifiedFile.isEmpty()) {
                     ftpServer.createFile(localFile);
                 } else {
-                    System.out.println("Local file modified at " + new Date(localFile.lastModified()));
-                    System.out.println("Remote file modified at " + new Date(lastTimeModified(lastModifiedFile)));
+//                    System.out.println("Local file modified at " + new Date(localFile.lastModified()));
+//                    System.out.println("Remote file modified at " + new Date(lastTimeModified(lastModifiedFile)));
                     if (localFile.lastModified() > lastTimeModified(lastModifiedFile)) {
                         ftpServer.deleteFile(localFile);
                         ftpServer.createFile(localFile);
@@ -119,8 +125,12 @@ public final class RemoteMirror implements IMirror {
     private void deleteFileOrDirectoryIfNecessary(File localFile, File remoteFile) {
         File possibleLocalFile = new File(localFile.getPath() + File.separator + remoteFile.getName());
         if (!possibleLocalFile.exists()) {
-            if (!ftpServer.deleteFile(remoteFile)) {
-                ftpServer.removeDirectory(remoteFile);
+            try {
+                if (!ftpServer.deleteFile(remoteFile)) {
+                    ftpServer.removeDirectory(remoteFile);
+                }
+            } catch (Exception ex) {
+                Logger.getLogger(RemoteMirror.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }

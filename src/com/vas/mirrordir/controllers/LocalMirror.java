@@ -16,7 +16,14 @@ public class LocalMirror implements IMirror {
 
     private File dirOrigin;
     private File dirDestination;
-
+    
+    /**
+     * Constructor
+     * @param pathOrigin indicates the local origin directory path
+     * @param pathDestination indicates the local destination directory path
+     * @throws NotADirectoryException
+     * @throws IOException 
+     */
     public LocalMirror(String pathOrigin, String pathDestination) throws NotADirectoryException, IOException {
         setOriginPath(pathOrigin);
         setDestinationPath(pathDestination);
