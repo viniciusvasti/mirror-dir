@@ -52,15 +52,8 @@ public class FTPServer {
         String usr = "USER vinicius.vas.ti" + "\r\n";
         sendCommand(usr);
         String reply = receiveReply();
-        if (DEBUG) {
-            System.out.println("Sent USER - " + reply);
-        }
         if (reply.startsWith("2")) {
             reply = receiveReply();
-        }
-
-        if (DEBUG) {
-            System.out.println("Sent USER - " + reply);
         }
         if (!reply.startsWith("331 ")) {
             throw new Exception("Error: " + reply);
@@ -69,9 +62,6 @@ public class FTPServer {
         String password = "PASS 123456";
         sendCommand(password);
         reply = receiveReply();
-        if (DEBUG) {
-            System.out.println("Sent PASSWORD - " + reply);
-        }
         if (!reply.startsWith("2")) {
             throw new Exception("Error: " + reply);
         }
@@ -81,9 +71,6 @@ public class FTPServer {
     public boolean disconnect() throws Exception {
         sendCommand("QUIT");
         String reply = receiveReply();
-        if (DEBUG) {
-            System.out.println("Sent QUIT - " + reply);
-        }
         if (!reply.startsWith("2")) {
             throw new Exception("Error: " + reply);
         }
@@ -102,21 +89,15 @@ public class FTPServer {
             while (reply.startsWith("1")) {
                 reply = receiveReply();
             }
-            if (DEBUG) {
-                System.out.println("Requested File List - " + reply);
-            }
             if (!reply.startsWith("2")) {
                 passiveSocket.close();
                 throw new Exception("Error: " + reply);
             }
             reply = receiveReply(passiveSocket.getInputStream());
-            if (DEBUG) {
-                System.out.println("Requested File List - " + reply);
-            }
-            
+
             if (!reply.isEmpty()) {
                 String[] lista = reply.split("\\n");
-                
+
                 for (String url : lista) {
                     serverFiles.add(new File(url.trim()));
                 }
@@ -130,9 +111,6 @@ public class FTPServer {
         try {
             sendCommand("MDTM " + file.getName());
             String reply = receiveReply();
-            if (DEBUG) {
-                System.out.println("Requested Last Modified - " + reply);
-            }
             if (!reply.startsWith("2")) {
                 return "";
             }
@@ -146,46 +124,35 @@ public class FTPServer {
     public void changeDirectory(String path) throws Exception {
         sendCommand("CWD " + path);
         String reply = receiveReply();
-        if (DEBUG) {
-            System.out.println("Requested Last Modified - " + reply);
-        }
         if (!reply.startsWith("2")) {
             throw new Exception("Error: " + reply);
         }
     }
 
-    public boolean createFile(File file) {
+    public boolean createFile(File file) throws IOException {
+        InputStream fileInputStream = null;
+        OutputStream fileOutputStream = null;
         try {
             toBinaryMode();
             try (Socket passiveSocket = pasv()) {
                 sendCommand("STOR " + file.getName());
                 String reply = receiveReply();
-                
-                if (DEBUG) {
-                    System.out.println("Sent STOR - " + reply);
-                }
+
                 if (!reply.startsWith("1")) {
                     passiveSocket.close();
                     throw new Exception("Error: " + reply);
                 }
-                
-                InputStream fileInputStream = new FileInputStream(file);
-                OutputStream fileOutputStream = passiveSocket.getOutputStream();
+
+                fileInputStream = new FileInputStream(file);
+                fileOutputStream = passiveSocket.getOutputStream();
                 byte[] buffer = new byte[4096];
                 int bytesRead;
                 while ((bytesRead = fileInputStream.read(buffer)) != -1) {
                     fileOutputStream.write(buffer);
                 }
                 fileOutputStream.flush();
-                
+
                 reply = receiveReply();
-//            if (!reply.startsWith("2")) {
-//                passiveSocket.close();
-//                throw new Exception("Error: " + reply);
-//            }
-if (DEBUG) {
-    System.out.println(reply);
-}
             }
             return true;
         } catch (IOException ex) {
@@ -194,6 +161,13 @@ if (DEBUG) {
             Logger.getLogger(FTPServer.class.getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
             Logger.getLogger(FTPServer.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (fileInputStream != null) {
+                fileInputStream.close();
+            }
+            if (fileOutputStream != null) {
+                fileOutputStream.close();
+            }
         }
         return false;
     }
@@ -206,9 +180,6 @@ if (DEBUG) {
                 // If the reply code starts with 1, wait for next reply
                 while (reply.startsWith("1")) {
                     reply = receiveReply();
-                }
-                if (DEBUG) {
-                    System.out.println("Sent DELE - " + reply);
                 }
                 if (!reply.startsWith("2")) {
                     passiveSocket.close();
@@ -234,9 +205,6 @@ if (DEBUG) {
             while (reply.startsWith("1")) {
                 reply = receiveReply();
             }
-            if (DEBUG) {
-                System.out.println(reply);
-            }
             if (!reply.startsWith("2") && !reply.startsWith("550")) {
                 throw new Exception("Error: " + reply);
             }
@@ -260,16 +228,10 @@ if (DEBUG) {
                 while (reply.startsWith("1")) {
                     reply = receiveReply();
                 }
-                if (DEBUG) {
-                    System.out.println("Sent DELE - " + reply);
-                }
                 if (!reply.startsWith("2")) {
                     System.out.println("Error: " + reply);
                 }
                 reply = receiveReply(passiveSocket.getInputStream());
-                if (DEBUG) {
-                    System.out.println(reply);
-                }
             }
             return true;
         } catch (IOException ex) {
@@ -295,9 +257,6 @@ if (DEBUG) {
     public Socket pasv() throws IOException, InterruptedException {
         sendCommand("PASV");
         String reply = receiveReply();
-        if (DEBUG) {
-            System.out.println(reply);
-        }
         if (!reply.startsWith("2")) {
             System.out.println("Error: " + reply);
             return null;
@@ -308,6 +267,9 @@ if (DEBUG) {
 
     //gonna be private
     public void sendCommand(String command) {
+        if (DEBUG) {
+            System.out.println("Sent - " + command);
+        }
         command += "\r\n";
         try {
             outputStream.write(command.getBytes());
@@ -330,6 +292,10 @@ if (DEBUG) {
         } catch (IOException ex) {
             Logger.getLogger(FTPServer.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return new String(buff).trim();
+        String reply = new String(buff).trim();
+        if (DEBUG) {
+            System.out.println("Receive - " + reply + "\n");
+        }
+        return reply;
     }
 }

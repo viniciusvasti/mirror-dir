@@ -105,7 +105,11 @@ public final class RemoteMirror extends AbstractMirror {
         if (localFile.isFile()) {
             lastModifiedFile = ftpServer.lastModifiedFile(localFile);
             if (lastModifiedFile.isEmpty()) {
-                ftpServer.createFile(localFile);
+                try {
+                    ftpServer.createFile(localFile);
+                } catch (IOException ex) {
+                    Logger.getLogger(RemoteMirror.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         } else {
             ftpServer.createDirectory(localFile);
