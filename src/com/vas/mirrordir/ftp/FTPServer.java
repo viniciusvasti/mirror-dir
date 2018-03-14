@@ -41,13 +41,13 @@ public class FTPServer {
     private InputStream inputStream;
     private OutputStream outputStream;
     private final boolean DEBUG = true;
-    private FTPCredentials credentials;
+    private final FTPCredentials credentials;
 
     public FTPServer(FTPCredentials credentials) {
         this.credentials = credentials;
     }
 
-    public boolean connect() throws UnknownHostException, IOException, InterruptedException, Exception {
+    public synchronized boolean connect() throws UnknownHostException, IOException, InterruptedException, Exception {
         socket = new Socket(credentials.getDomain(), credentials.getPort());
         inputStream = socket.getInputStream();
         outputStream = socket.getOutputStream();
@@ -71,7 +71,7 @@ public class FTPServer {
         return true;
     }
 
-    public boolean disconnect() throws Exception {
+    public synchronized boolean disconnect() throws Exception {
         sendCommand("QUIT");
         String reply = receiveReply();
         if (!reply.startsWith("2")) {
@@ -83,7 +83,7 @@ public class FTPServer {
         return true;
     }
 
-    public List<File> getServerFiles() throws IOException, InterruptedException, Exception {
+    public synchronized List<File> getServerFiles() throws IOException, InterruptedException, Exception {
         List<File> serverFiles = new ArrayList<>();
         try (Socket passiveSocket = pasv()) {
             sendCommand("MLSD");
@@ -109,7 +109,7 @@ public class FTPServer {
         return serverFiles;
     }
 
-    public String lastModifiedFile(File file) throws Exception {
+    public synchronized String lastModifiedFile(File file) throws Exception {
         //reply if exist: "213 20180314120615"
         try {
             sendCommand("MDTM " + file.getName());
@@ -124,7 +124,7 @@ public class FTPServer {
         throw new Exception("Error at request MDTM");
     }
 
-    public void changeDirectory(String path) throws Exception {
+    public synchronized void changeDirectory(String path) throws Exception {
         sendCommand("CWD " + path);
         String reply = receiveReply();
         if (!reply.startsWith("2")) {
@@ -132,7 +132,7 @@ public class FTPServer {
         }
     }
 
-    public boolean createFile(File file) throws IOException {
+    public synchronized boolean createFile(File file) throws IOException {
         InputStream fileInputStream = null;
         OutputStream fileOutputStream = null;
         try {
@@ -175,7 +175,7 @@ public class FTPServer {
         return false;
     }
 
-    public boolean deleteFile(File file) {
+    public synchronized boolean deleteFile(File file) {
         try {
             try (Socket passiveSocket = pasv()) {
                 sendCommand("DELE " + file.getName());
@@ -201,7 +201,7 @@ public class FTPServer {
         return false;
     }
 
-    public boolean createDirectory(File file) {
+    public synchronized boolean createDirectory(File file) {
         try {
             sendCommand("MKD " + file.getName());
             String reply = receiveReply();
@@ -223,7 +223,7 @@ public class FTPServer {
         return false;
     }
 
-    public boolean removeDirectory(File file) {
+    public synchronized boolean removeDirectory(File file) {
         try {
             try (Socket passiveSocket = pasv()) {
                 sendCommand("RMD " + file.getName());
@@ -247,7 +247,7 @@ public class FTPServer {
         return false;
     }
 
-    public boolean toBinaryMode() throws Exception {
+    public synchronized boolean toBinaryMode() throws Exception {
         sendCommand("TYPE I");
         String reply = receiveReply();
         if (!reply.startsWith("2")) {
@@ -256,8 +256,7 @@ public class FTPServer {
         return true;
     }
 
-    //gonna be private
-    public Socket pasv() throws IOException, InterruptedException {
+    private Socket pasv() throws IOException, InterruptedException {
         sendCommand("PASV");
         String reply = receiveReply();
         if (!reply.startsWith("2")) {
@@ -268,8 +267,7 @@ public class FTPServer {
         return new Socket(address.getIp(), address.getPort());
     }
 
-    //gonna be private
-    public void sendCommand(String command) {
+    private void sendCommand(String command) {
         if (DEBUG) {
             System.out.println("Sent - " + command);
         }
@@ -282,13 +280,11 @@ public class FTPServer {
         }
     }
 
-    //gonna be private
-    public String receiveReply() {
+    private String receiveReply() {
         return receiveReply(inputStream);
     }
 
-    //gonna be private
-    public String receiveReply(InputStream inputStream) {
+    private String receiveReply(InputStream inputStream) {
         byte[] buff = new byte[10000];
         try {
             inputStream.read(buff);
