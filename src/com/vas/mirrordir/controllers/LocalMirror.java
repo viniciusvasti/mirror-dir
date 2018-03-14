@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.vas.mirrordir.controllers;
 
 import com.vas.mirrordir.exceptions.NotADirectoryException;
@@ -12,38 +7,31 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  *
  * @author Vinícius
  */
-public class LocalMirror extends AbstractMirror {
+public class LocalMirror implements IMirror {
 
     private File dirOrigin;
     private File dirDestination;
 
     public LocalMirror(String pathOrigin, String pathDestination) throws NotADirectoryException, IOException {
-        setPathOrigin(pathOrigin);
-        setPathDestination(pathDestination);
+        setOriginPath(pathOrigin);
+        setDestinationPath(pathDestination);
     }
 
     @Override
-    public void setPathOrigin(String pathOrigin) throws NotADirectoryException {
-        File fileOrigin = new File(pathOrigin);
-        if (!fileOrigin.exists()) {
-            throw new NotADirectoryException("The origin path doesn't exists.");
-        }
-        if (!fileOrigin.isDirectory()) {
-            throw new NotADirectoryException("The origin path is a file. It need to be a directory.");
-        }
-        this.dirOrigin = fileOrigin;
+    public void setOriginPath(String pathOrigin) throws NotADirectoryException {
+        this.dirOrigin = new File(pathOrigin);
+        validOriginDirectory();
     }
 
     @Override
-    public void setPathDestination(String pathDestination) throws IOException, NotADirectoryException {
+    public void setDestinationPath(String pathDestination) throws IOException, NotADirectoryException {
         File fileDestination = new File(pathDestination);
+        // create directory if it doesn't exist
         if (!fileDestination.exists()) {
             fileDestination.createNewFile();
             if (!fileDestination.isDirectory()) {
@@ -60,7 +48,7 @@ public class LocalMirror extends AbstractMirror {
             throw new NotADirectoryException("The origin path doesn't exists.");
         }
         if (!this.dirDestination.exists()) {
-            setPathDestination(this.dirDestination.getPath());
+            setDestinationPath(this.dirDestination.getPath());
         }
         reflect(this.dirOrigin, this.dirDestination);
     }
@@ -100,15 +88,24 @@ public class LocalMirror extends AbstractMirror {
                 }
             }
 
-            // iterates over the destination directory comparing the files and excluding it if necessary 
-            for (File fileInDestination : listFilesInDestination) {
+            // iterates over the destination directory comparing the files and excluding it if necessary
+            listFilesInDestination.forEach((fileInDestination) -> {
                 File possibleFileInOrigin = new File(fileOrigin.getPath() + File.separator + fileInDestination.getName());
                 if (!possibleFileInOrigin.exists()) {
                     fileInDestination.delete();
                 }
-            }
-        } catch (Exception ex) {
+            });
+        } catch (IOException ex) {
             System.out.println(ex.getMessage());
+        }
+    }
+
+    private void validOriginDirectory() throws NotADirectoryException {
+        if (!this.dirOrigin.exists()) {
+            throw new NotADirectoryException("The origin path doesn't exists.");
+        }
+        if (!this.dirOrigin.isDirectory()) {
+            throw new NotADirectoryException("The origin path is a file. It need to be a directory.");
         }
     }
 }

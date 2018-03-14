@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.vas.mirrordir.controllers;
 
 import com.vas.mirrordir.exceptions.NotADirectoryException;
@@ -12,7 +7,6 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -24,7 +18,7 @@ import java.util.logging.Logger;
  *
  * @author Vinícius
  */
-public final class RemoteMirror extends AbstractMirror {
+public final class RemoteMirror implements IMirror {
 
     private File localDir;
     private File remoteDir;
@@ -32,36 +26,27 @@ public final class RemoteMirror extends AbstractMirror {
     Stack<File> directoryStack;
 
     public RemoteMirror(String pathOrigin) throws NotADirectoryException, IOException {
-        setPathOrigin(pathOrigin);
+        setOriginPath(pathOrigin);
         ftpServer = new FTPServer();
         directoryStack = new Stack<>();
     }
 
     //gonna be private with Java 9
     @Override
-    public void setPathOrigin(String pathOrigin) throws NotADirectoryException {
-        File fileOrigin = new File(pathOrigin);
-        if (!fileOrigin.exists()) {
-            throw new NotADirectoryException("The origin path doesn't exists.");
-        }
-        if (!fileOrigin.isDirectory()) {
-            throw new NotADirectoryException("The origin path is a file. It need to be a directory.");
-        }
-        this.localDir = fileOrigin;
+    public void setOriginPath(String pathOrigin) throws NotADirectoryException {
+        this.localDir = new File(pathOrigin);
+        validLocalDirectory();
     }
 
     @Override
-    public void setPathDestination(String pathDestination) throws IOException, NotADirectoryException {
+    public void setDestinationPath(String pathDestination) throws IOException, NotADirectoryException {
         remoteDir = new File(pathDestination);
     }
 
     @Override
     public void reflect() throws IOException, NotADirectoryException, UnknownHostException {
         System.out.println("Start reflecting...");
-        running = true;
-        if (!this.localDir.exists()) {
-            throw new NotADirectoryException("The origin path doesn't exists.");
-        }
+        validLocalDirectory();
         try {
             if (ftpServer.connect()) {
                 reflectDir();
@@ -75,7 +60,6 @@ public final class RemoteMirror extends AbstractMirror {
             Logger.getLogger(RemoteMirror.class.getName()).log(Level.SEVERE, null, ex);
         }
         System.out.println("Finish reflecting...");
-        running = false;
     }
 
     public void reflectDir() throws IOException {
@@ -107,7 +91,7 @@ public final class RemoteMirror extends AbstractMirror {
 
     private void createFileOrDirectoryIfNecessary(File localFile) {
         try {
-            String lastModifiedFile = "";
+            String lastModifiedFile;
             if (localFile.isFile()) {
                 lastModifiedFile = ftpServer.lastModifiedFile(localFile);
                 if (lastModifiedFile.isEmpty()) {
@@ -163,9 +147,18 @@ public final class RemoteMirror extends AbstractMirror {
                 );
                 time = date.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
             }
-        } catch (Exception ex) {
+        } catch (NumberFormatException ex) {
             System.out.println(ex.getMessage());
         }
         return time;
+    }
+    
+    private void validLocalDirectory() throws NotADirectoryException {
+        if (!this.localDir.exists()) {
+            throw new NotADirectoryException("The origin path doesn't exists.");
+        }
+        if (!this.localDir.isDirectory()) {
+            throw new NotADirectoryException("The origin path is a file. It need to be a directory.");
+        }
     }
 }
