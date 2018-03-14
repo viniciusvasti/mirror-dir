@@ -10,7 +10,11 @@ import com.vas.mirrordir.ftp.FTPServer;
 import java.io.File;
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Stack;
 import java.util.logging.Level;
@@ -101,19 +105,28 @@ public final class RemoteMirror extends AbstractMirror {
     }
 
     private void createFileOrDirectoryIfNecessary(File localFile) {
-        String lastModifiedFile = "";
-        if (localFile.isFile()) {
-            lastModifiedFile = ftpServer.lastModifiedFile(localFile);
-            if (lastModifiedFile.isEmpty()) {
-                try {
+        try {
+            String lastModifiedFile = "";
+            if (localFile.isFile()) {
+                lastModifiedFile = ftpServer.lastModifiedFile(localFile);
+                if (lastModifiedFile.isEmpty()) {
                     ftpServer.createFile(localFile);
-                } catch (IOException ex) {
-                    Logger.getLogger(RemoteMirror.class.getName()).log(Level.SEVERE, null, ex);
+                } else {
+                    System.out.println("Local file modified at " + new Date(localFile.lastModified()));
+                    System.out.println("Remote file modified at " + new Date(lastTimeModified(lastModifiedFile)));
+                    if (localFile.lastModified() > lastTimeModified(lastModifiedFile)) {
+                        ftpServer.deleteFile(localFile);
+                        ftpServer.createFile(localFile);
+                    }
                 }
+            } else {
+                ftpServer.createDirectory(localFile);
+                directoryStack.push(localFile);
             }
-        } else {
-            ftpServer.createDirectory(localFile);
-            directoryStack.push(localFile);
+        } catch (IOException ex) {
+            Logger.getLogger(RemoteMirror.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(RemoteMirror.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -123,5 +136,34 @@ public final class RemoteMirror extends AbstractMirror {
             ftpServer.deleteFile(remoteFile);
             ftpServer.removeDirectory(remoteFile);
         }
+    }
+
+    /**
+     * Converts the FTP response for MDTM (like "213 20180314123417" =
+     * 2018-03-14 12:34:17) to milliseconds
+     *
+     * @param lastModified
+     * @return a long that represents time in milliseconds
+     */
+    private long lastTimeModified(String lastModified) {
+        // TODO needs find a way to verify the time fuse to compare time correctly
+        long time = 0;
+        try {
+            if (!lastModified.isEmpty()) {
+                String dateString = lastModified.split(" ")[1];
+                LocalDateTime date = LocalDateTime.of(
+                        Integer.parseInt(dateString.substring(0, 4)),
+                        Integer.parseInt(dateString.substring(4, 6)),
+                        Integer.parseInt(dateString.substring(6, 8)),
+                        Integer.parseInt(dateString.substring(8, 10))-3,
+                        Integer.parseInt(dateString.substring(10, 12)),
+                        Integer.parseInt(dateString.substring(12))
+                );
+                time = date.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+            }
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+        return time;
     }
 }

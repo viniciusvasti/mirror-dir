@@ -106,7 +106,7 @@ public class FTPServer {
         return serverFiles;
     }
 
-    public String lastModifiedFile(File file) {
+    public String lastModifiedFile(File file) throws Exception {
         //reply if exist: "213 20180314120615"
         try {
             sendCommand("MDTM " + file.getName());
@@ -118,7 +118,7 @@ public class FTPServer {
         } catch (Exception ex) {
             Logger.getLogger(FTPServer.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return "425";
+        throw new Exception("Error at request MDTM");
     }
 
     public void changeDirectory(String path) throws Exception {
