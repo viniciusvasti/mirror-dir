@@ -27,6 +27,7 @@ import java.util.logging.Logger;
 public final class RemoteMirror extends AbstractMirror {
 
     private File localDir;
+    private File remoteDir;
     private final FTPServer ftpServer;
     Stack<File> directoryStack;
 
@@ -51,7 +52,7 @@ public final class RemoteMirror extends AbstractMirror {
 
     @Override
     public void setPathDestination(String pathDestination) throws IOException, NotADirectoryException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        remoteDir = new File(pathDestination);
     }
 
     @Override
@@ -133,8 +134,9 @@ public final class RemoteMirror extends AbstractMirror {
     private void deleteFileOrDirectoryIfNecessary(File localFile, File remoteFile) {
         File possibleLocalFile = new File(localFile.getPath() + File.separator + remoteFile.getName());
         if (!possibleLocalFile.exists()) {
-            ftpServer.deleteFile(remoteFile);
-            ftpServer.removeDirectory(remoteFile);
+            if (!ftpServer.deleteFile(remoteFile)) {
+                ftpServer.removeDirectory(remoteFile);
+            }
         }
     }
 
@@ -155,7 +157,7 @@ public final class RemoteMirror extends AbstractMirror {
                         Integer.parseInt(dateString.substring(0, 4)),
                         Integer.parseInt(dateString.substring(4, 6)),
                         Integer.parseInt(dateString.substring(6, 8)),
-                        Integer.parseInt(dateString.substring(8, 10))-3,
+                        Integer.parseInt(dateString.substring(8, 10)) - 3,
                         Integer.parseInt(dateString.substring(10, 12)),
                         Integer.parseInt(dateString.substring(12))
                 );

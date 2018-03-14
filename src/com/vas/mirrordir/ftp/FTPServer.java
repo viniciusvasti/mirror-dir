@@ -83,7 +83,7 @@ public class FTPServer {
     public List<File> getServerFiles() throws IOException, InterruptedException, Exception {
         List<File> serverFiles = new ArrayList<>();
         try (Socket passiveSocket = pasv()) {
-            sendCommand("NLST");
+            sendCommand("MLSD");
             String reply = receiveReply();
             // If the reply code starts with 1, wait for next reply
             while (reply.startsWith("1")) {
@@ -99,7 +99,7 @@ public class FTPServer {
                 String[] lista = reply.split("\\n");
 
                 for (String url : lista) {
-                    serverFiles.add(new File(url.trim()));
+                    serverFiles.add(new File(url.split(";")[4].trim()));
                 }
             }
         }
@@ -183,7 +183,8 @@ public class FTPServer {
                 }
                 if (!reply.startsWith("2")) {
                     passiveSocket.close();
-                    throw new Exception("Error: " + reply);
+                    System.out.println("Error: " + reply);
+                    return false;
                 }
             }
             return true;
@@ -231,7 +232,6 @@ public class FTPServer {
                 if (!reply.startsWith("2")) {
                     System.out.println("Error: " + reply);
                 }
-                reply = receiveReply(passiveSocket.getInputStream());
             }
             return true;
         } catch (IOException ex) {
