@@ -127,6 +127,7 @@ public class FTPServer {
     }
 
     public String lastModifiedFile(File file) {
+        //reply if exist: "213 20180314120615"
         try {
             sendCommand("MDTM " + file.getName());
             String reply = receiveReply();
@@ -156,13 +157,11 @@ public class FTPServer {
 
     public boolean createFile(File file) {
         try {
+            toBinaryMode();
             Socket passiveSocket = pasv();
             sendCommand("STOR " + file.getName());
             String reply = receiveReply();
-            // If the reply code starts with 1, wait for next reply
-            //while (reply.startsWith("1")) {
-            reply = receiveReply();
-            //}
+
             if (DEBUG) {
                 System.out.println("Sent STOR - " + reply);
             }
@@ -170,18 +169,21 @@ public class FTPServer {
                 passiveSocket.close();
                 throw new Exception("Error: " + reply);
             }
-            
+
             InputStream fileInputStream = new FileInputStream(file);
             OutputStream fileOutputStream = passiveSocket.getOutputStream();
             byte[] buffer = new byte[4096];
-            fileOutputStream.write(fileInputStream.read(buffer));
-            fileOutputStream.flush();
-            
-            reply = receiveReply(passiveSocket.getInputStream());
-            if (!reply.startsWith("2")) {
-                passiveSocket.close();
-                throw new Exception("Error: " + reply);
+            int bytesRead;
+            while ((bytesRead = fileInputStream.read(buffer)) != -1) {
+                fileOutputStream.write(buffer);
             }
+            fileOutputStream.flush();
+
+            reply = receiveReply();
+//            if (!reply.startsWith("2")) {
+//                passiveSocket.close();
+//                throw new Exception("Error: " + reply);
+//            }
             if (DEBUG) {
                 System.out.println(reply);
             }
@@ -263,8 +265,7 @@ public class FTPServer {
                 System.out.println("Sent DELE - " + reply);
             }
             if (!reply.startsWith("2")) {
-                passiveSocket.close();
-                throw new Exception("Error: " + reply);
+                System.out.println("Error: " + reply);
             }
             reply = receiveReply(passiveSocket.getInputStream());
             if (DEBUG) {
@@ -280,6 +281,15 @@ public class FTPServer {
             Logger.getLogger(FTPServer.class.getName()).log(Level.SEVERE, null, ex);
         }
         return false;
+    }
+
+    public boolean toBinaryMode() throws Exception {
+        sendCommand("TYPE I");
+        String reply = receiveReply();
+        if (!reply.startsWith("2")) {
+            throw new Exception("Error: " + reply);
+        }
+        return true;
     }
 
     //gonna be private

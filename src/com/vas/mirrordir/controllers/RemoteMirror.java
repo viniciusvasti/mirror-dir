@@ -108,9 +108,8 @@ public class RemoteMirror extends AbstractMirror {
                 ftpServer.createFile(localFile);
             }
         } else {
-            if (ftpServer.createDirectory(localFile)) {
-                directoryStack.push(localFile);
-            }
+            ftpServer.createDirectory(localFile);
+            directoryStack.push(localFile);
         }
     }
 
