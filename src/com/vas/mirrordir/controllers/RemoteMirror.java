@@ -74,7 +74,7 @@ public class RemoteMirror extends AbstractMirror {
     }
 
     public void reflectDir() throws IOException {
-        try {            
+        try {
             directoryStack.push(localDir);
             do {
                 File currentFile = directoryStack.pop();
@@ -108,8 +108,9 @@ public class RemoteMirror extends AbstractMirror {
                 ftpServer.createFile(localFile);
             }
         } else {
-            ftpServer.createDirectory(localFile);
-            directoryStack.push(localFile);
+            if (ftpServer.createDirectory(localFile)) {
+                directoryStack.push(localFile);
+            }
         }
     }
 
