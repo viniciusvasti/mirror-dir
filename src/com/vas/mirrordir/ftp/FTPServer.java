@@ -2,6 +2,7 @@ package com.vas.mirrordir.ftp;
 
 import com.vas.mirrordir.models.Address;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -159,17 +160,28 @@ public class FTPServer {
             sendCommand("STOR " + file.getName());
             String reply = receiveReply();
             // If the reply code starts with 1, wait for next reply
-            while (reply.startsWith("1")) {
-                reply = receiveReply();
-            }
+            //while (reply.startsWith("1")) {
+            reply = receiveReply();
+            //}
             if (DEBUG) {
                 System.out.println("Sent STOR - " + reply);
             }
-            if (!reply.startsWith("2")) {
-            passiveSocket.close();
+            if (!reply.startsWith("1")) {
+                passiveSocket.close();
                 throw new Exception("Error: " + reply);
             }
+            
+            InputStream fileInputStream = new FileInputStream(file);
+            OutputStream fileOutputStream = passiveSocket.getOutputStream();
+            byte[] buffer = new byte[4096];
+            fileOutputStream.write(fileInputStream.read(buffer));
+            fileOutputStream.flush();
+            
             reply = receiveReply(passiveSocket.getInputStream());
+            if (!reply.startsWith("2")) {
+                passiveSocket.close();
+                throw new Exception("Error: " + reply);
+            }
             if (DEBUG) {
                 System.out.println(reply);
             }
@@ -198,7 +210,7 @@ public class FTPServer {
                 System.out.println("Sent DELE - " + reply);
             }
             if (!reply.startsWith("2")) {
-            passiveSocket.close();
+                passiveSocket.close();
                 throw new Exception("Error: " + reply);
             }
             passiveSocket.close();
@@ -251,7 +263,7 @@ public class FTPServer {
                 System.out.println("Sent DELE - " + reply);
             }
             if (!reply.startsWith("2")) {
-            passiveSocket.close();
+                passiveSocket.close();
                 throw new Exception("Error: " + reply);
             }
             reply = receiveReply(passiveSocket.getInputStream());
@@ -281,23 +293,8 @@ public class FTPServer {
             System.out.println("Error: " + reply);
             return null;
         }
-        Address address = getIPandPort(reply);
+        Address address = new Address(reply);
         return new Socket(address.getIp(), address.getPort());
-    }
-
-    //gonna be private
-    public Address getIPandPort(String resp) {
-        StringTokenizer st = new StringTokenizer(resp);
-        st.nextToken("(");
-        String ip = st.nextToken(",").substring(1) + "."
-                + st.nextToken(",") + "."
-                + st.nextToken(",") + "."
-                + st.nextToken(",");
-        int value1 = Integer.parseInt(st.nextToken(","));
-        int value2 = Integer.parseInt(st.nextToken(")").substring(1));
-        int port = value1 * 256 + value2;
-        Address addr = new Address(ip, port);
-        return addr;
     }
 
     //gonna be private
