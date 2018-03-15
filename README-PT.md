@@ -44,11 +44,25 @@ Start reflecting...
 Finish reflecting...
 ```
 
+### Erros (possíveis) conhecidos
+* Na classe [RemoteMirror](https://github.com/viniciusvasti/mirror-dir/blob/master/src/com/vas/mirrordir/controllers/RemoteMirror.java), o método lastTimeModified retorna, em milisegundos, a data da última motificação do arquivo. Uma vez que o horário retornado pelo servidor está em UTC e o meu fuso horário é UTC-3, eu subtraí 3 da hora. É preciso comparar o fuso do servidor com o do usuário para fazer o ajuste adequado para  a hora:
+```
+LocalDateTime date = LocalDateTime.of(
+                        Integer.parseInt(dateString.substring(0, 4)), // year
+                        Integer.parseInt(dateString.substring(4, 6)), // month
+                        Integer.parseInt(dateString.substring(6, 8)), //day
+                        Integer.parseInt(dateString.substring(8, 10)) - 3, // hour
+                        Integer.parseInt(dateString.substring(10, 12)), // minute
+                        Integer.parseInt(dateString.substring(12)) // second
+);
+```
+* Ao enviar arquivos para o servidor, por algum motivo que desconheço, estão sendo acrescentados 3kb em cada arquivo
+
 ## Contribuindo
 
 Fique a vontade para executar, testar, criar issues e enviar seus pull requests.
 
-ps* na class FTPServer você pode alterar a constante ```DEBUG``` para ```true```, assim os comandos e respostas FTP serão exibidos no console.
+ps* na classe FTPServer você pode alterar a constante ```DEBUG``` para ```true```, assim os comandos e respostas FTP serão exibidos no console.
 
 ## Autores
 
