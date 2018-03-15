@@ -1,6 +1,6 @@
 # mirror-dir
-A Java console application that mirrors a local directory to a FTP server.
-Basically, once the application is connected to a FTP server, it starts to copy files and subdirectories
+A Java console application that mirrors a local directory to an FTP server.
+Basically, once the application is connected to an FTP server, it starts to copy files and subdirectories
 from your local directory to the FTP server recursively.
 If the file already exists, mirror-dir verify if it was locally modified, comparing the "last modified" property of the files.
 It uses Threads to run this in a loop.
@@ -13,7 +13,7 @@ It uses Threads to run this in a loop.
 
 ### Prerequisites to run
 * JRE 8 or higher installed
-* A FTP Server hosting account (I used a free limited account from [DriveHQ](https://www.drivehq.com))
+* An FTP Server hosting account (I used a free limited account from [DriveHQ](https://www.drivehq.com))
 
 ### Running mirror-dir
 After opening you Operational System command line terminal:
