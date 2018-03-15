@@ -2,13 +2,13 @@
 A Java console application that mirrors a local directory to a FTP server.
 Basically, once the application is connected to a FTP server, it starts to copy files and subdirectories
 from your local directory to the FTP server recursively.
-If the file already exists, mirror-dir verify if it was modified locally, comparing the "last modified" property of the files.
+If the file already exists, mirror-dir verify if it was locally modified, comparing the "last modified" property of the files.
 It uses Threads to run this in a loop.
 
 ## Getting Started
 
 ### Prerequisites for development and testing purposes
-* Have JDK 8 or higher installed
+* JDK 8 or higher installed
 * Your favorite JAVA IDE (or only the notepad and OS command line if you like old school programming style)
 
 ### Prerequisites to run
