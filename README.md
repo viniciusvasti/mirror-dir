@@ -24,7 +24,7 @@ After opening you Operational System command line terminal:
 
 ```C:\User\JavaProjects\MirrorDir\build\classes>java com.vas.mirrordir.main.Main```
 
-The console application is going to ask you for the FTP connection parameters, and then it will start reflecting the directory to the FTP server.
+The console application is going to ask you for the FTP connection parameters, and then it will start reflecting the directory on the FTP server.
 ```
 ### MirrorDir config ###
 >Local directory (e.g. C:\Vinicius\Documents\DirectoryToMirror):
@@ -46,9 +46,9 @@ Finish reflecting...
 
 ## Contributing
 
-Be free to run/test/create issues/pull requests
+Feel free to run/test/create issues and even send pull requests.
 
-ps* at FTPServer.class you can set ```DEBUG``` constant to ```true```, then the FTP commands and responses gonna be printed
+ps* at FTPServer.class you can set ```DEBUG``` constant to ```true```, then the FTP commands and responses are going to be printed
 
 ## Authors
 
