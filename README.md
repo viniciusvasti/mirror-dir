@@ -13,7 +13,7 @@ It uses Threads to run this in a loop.
 
 ### Prerequisites to run
 * JRE 8 or higher installed
-* An FTP Server hosting account (I used a free limited account from [DriveHQ](https://www.drivehq.com))
+* A FTP Server hosting account (I used a free limited account from [DriveHQ](https://www.drivehq.com))
 
 ### Running mirror-dir
 After opening you Operational System command line terminal:
