@@ -1,5 +1,5 @@
 # mirror-dir
-A Java console application that mirrors a local directory to a FTP server
+A Java console application that mirrors a local directory to a FTP server.
 Basically, once the application is connected to a FTP server, it starts to copy files and subdirectories
 from your local directory to FTP server recursively.
 If the file already exists, mirror-dir verify if it was modified locally comparing the "last modified" property of the files.
@@ -16,15 +16,15 @@ It uses Threads to run this in a loop
 * An FTP Server hosting account (I used a free limited account from [DriveHQ](https://www.drivehq.com))
 
 ### Running mirror-dir
-After open you Operational System command line terminal:
-* you can run either the .jar file located at [MirrorDir.jar](https://github.com/viniciusvasti/mirror-dir/blob/master/dist/MirrorDir.jar):
+After opening you Operational System command line terminal:
+* you may either run the .jar file located at [MirrorDir.jar](https://github.com/viniciusvasti/mirror-dir/blob/master/dist/MirrorDir.jar):
 
 ```C:\User\Downloads>java -jar MirrorDir.jar```
 * or run the Main.class once you have all classes compiled:
 
 ```C:\User\JavaProjects\MirrorDir\build\classes>java com.vas.mirrordir.main.Main```
 
-Then, the console application gonna ask you for FTP connection parameters then start reflecting the directory to FTP server
+The console application is going to ask you for the FTP connection parameters, and then it will start reflecting the directory to the FTP server.
 ```
 ### MirrorDir config ###
 >Local directory (e.g. C:\Vinicius\Documents\DirectoryToMirror):
