@@ -44,6 +44,20 @@ Start reflecting...
 Finish reflecting...
 ```
 
+### Known issues/bugs
+* In [RemoteMirror](https://github.com/viniciusvasti/mirror-dir/blob/master/src/com/vas/mirrordir/controllers/RemoteMirror.java) class, the lastTimeModified class method returns, in milliseconds, the time of the last changes on the file. Since the DriveHQ FTP server time zone is UTC and my local time zone is UTC-3, I subtracted 3 units of the hour field. It would be better to compare the time zones of the FTP Server and the local time zone to do a suitable adjustment:
+```
+LocalDateTime date = LocalDateTime.of(
+                        Integer.parseInt(dateString.substring(0, 4)), // year
+                        Integer.parseInt(dateString.substring(4, 6)), // month
+                        Integer.parseInt(dateString.substring(6, 8)), //day
+                        Integer.parseInt(dateString.substring(8, 10)) - 3, // hour
+                        Integer.parseInt(dateString.substring(10, 12)), // minute
+                        Integer.parseInt(dateString.substring(12)) // second
+);
+```
+* When sending files to the FTP server, for some reason, the file size is increased by 3kb
+
 ## Contributing
 
 Feel free to run/test/create issues and even start pull requests.
