@@ -46,7 +46,7 @@ Finish reflecting...
 
 ## Contributing
 
-Feel free to run/test/create issues and even send pull requests.
+Feel free to run/test/create issues and even start pull requests.
 
 ps* at FTPServer.class you can set ```DEBUG``` constant to ```true```, then the FTP commands and responses are going to be printed
 
