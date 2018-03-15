@@ -12,8 +12,8 @@ It uses Threads to run this in a loop.
 * Your favorite JAVA IDE (or only the notepad and OS command line if you like old school programming style)
 
 ### Prerequisites to run
-* Have JRE 8 or higher installed
-* Have an FTP Server hosting account (I used a free limited account from [DriveHQ](https://www.drivehq.com))
+* JRE 8 or higher installed
+* An FTP Server hosting account (I used a free limited account from [DriveHQ](https://www.drivehq.com))
 
 ### Running mirror-dir
 After opening you Operational System command line terminal:
