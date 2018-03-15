@@ -9,7 +9,7 @@ It uses Threads to run this in a loop
 
 ### Prerequisites for development and testing purposes
 * Have installed JDK 8 or higher
-* Your fevorite JAVA IDE (or only the notepad and OS command line if like old school programming style)
+* Your favorite JAVA IDE (or only the notepad and OS command line if like old school programming style)
 
 ### Prerequisites to run
 * JRE 8 or higher
