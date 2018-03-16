@@ -5,6 +5,11 @@ do diretório local desejado para o servidor FTP recursivamente.
 Se o arquivo já existe, o mirror-dir verificar se este fora alterado localmente,
 comparando a propriedade "last modified" dos arquivos. Uma Thread é utilizada para repetir o processo constantemente.
 
+## Sem bibliotecas FTP de terceiros
+Eu sei que eu poderia usar a classe FTPClient da Apache Commons ou outras bibliotecas Java prontas, mas, com o objetivo
+de demonstrar habilidades, eu escolhi implementar minha própria classe de cliente FTP, usando sockets para conectar
+com o servidor FTP e input/output streams.
+
 ## Mãos a obra
 
 ### Pré-requisitos para propósitos de desenvolvimento e testes
