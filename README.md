@@ -5,8 +5,8 @@ from your local directory to the FTP server recursively.
 If the file already exists, mirror-dir verify if it was locally modified, comparing the "last modified" property of the files.
 It uses Threads to run this in a loop.
 
-## No FTP libraries
-I know I could be usin Apache Commons FTPClient class or other pre-compiled library, but with "showing skills" purpose,
+## Without third party libraries
+I know I could be using Apache Commons FTPClient class or other Java library. But, with "showing skills" purpose,
 I choose implement my own FTP class, using sockets to connect with FTP server and input/output streams.
 
 ## Getting Started
