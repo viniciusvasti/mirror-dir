@@ -66,7 +66,7 @@ LocalDateTime date = LocalDateTime.of(
 
 Feel free to run/test/create issues and even start pull requests.
 
-ps* at FTPServer.class you can set ```DEBUG``` constant to ```true```, then the FTP commands and responses are going to be printed
+ps* at FTPClient.class you can set ```DEBUG``` constant to ```true```, then the FTP commands and responses are going to be printed
 
 ## Authors
 

@@ -34,7 +34,7 @@ import java.util.logging.Logger;
  *
  * @author Vinicius
  */
-public class FTPServer {
+public class FTPClient {
 
     private Socket socket;
     private InputStream inputStream;
@@ -43,11 +43,11 @@ public class FTPServer {
     private final FTPCredentials credentials;
 
     /**
-     * Instanciate FTPServer with ftp user credentials
+     * Instanciate FTPClient with ftp user credentials
      *
      * @param credentials
      */
-    public FTPServer(FTPCredentials credentials) {
+    public FTPClient(FTPCredentials credentials) {
         this.credentials = credentials;
     }
 
@@ -149,7 +149,7 @@ public class FTPServer {
             }
             return reply;
         } catch (Exception ex) {
-            Logger.getLogger(FTPServer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(FTPClient.class.getName()).log(Level.SEVERE, null, ex);
         }
         throw new Exception("Error at request MDTM");
     }
@@ -202,11 +202,11 @@ public class FTPServer {
             }
             return true;
         } catch (IOException ex) {
-            Logger.getLogger(FTPServer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(FTPClient.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InterruptedException ex) {
-            Logger.getLogger(FTPServer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(FTPClient.class.getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
-            Logger.getLogger(FTPServer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(FTPClient.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             if (fileInputStream != null) {
                 fileInputStream.close();
@@ -253,11 +253,11 @@ public class FTPServer {
             }
             return true;
         } catch (IOException ex) {
-            Logger.getLogger(FTPServer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(FTPClient.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InterruptedException ex) {
-            Logger.getLogger(FTPServer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(FTPClient.class.getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
-            Logger.getLogger(FTPServer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(FTPClient.class.getName()).log(Level.SEVERE, null, ex);
         }
         return false;
     }
@@ -326,7 +326,7 @@ public class FTPServer {
             outputStream.write(command.getBytes());
             outputStream.flush();
         } catch (IOException ex) {
-            Logger.getLogger(FTPServer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(FTPClient.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -343,7 +343,7 @@ public class FTPServer {
         try {
             inputStream.read(buff);
         } catch (IOException ex) {
-            Logger.getLogger(FTPServer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(FTPClient.class.getName()).log(Level.SEVERE, null, ex);
         }
         String reply = new String(buff).trim();
         if (DEBUG) {

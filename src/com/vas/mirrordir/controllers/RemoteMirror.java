@@ -1,7 +1,7 @@
 package com.vas.mirrordir.controllers;
 
 import com.vas.mirrordir.exceptions.NotADirectoryException;
-import com.vas.mirrordir.ftp.FTPServer;
+import com.vas.mirrordir.ftp.FTPClient;
 import com.vas.mirrordir.models.FTPCredentials;
 import java.io.File;
 import java.io.IOException;
@@ -22,7 +22,7 @@ public final class RemoteMirror implements IMirror {
 
     private File localDir;
     private File remoteDir;
-    private final FTPServer ftpServer;
+    private final FTPClient ftpClient;
     Stack<File> directoryStack;
 
     /**
@@ -34,7 +34,7 @@ public final class RemoteMirror implements IMirror {
      */
     public RemoteMirror(String pathOrigin, FTPCredentials credentials) throws NotADirectoryException, IOException {
         setOriginPath(pathOrigin);
-        ftpServer = new FTPServer(credentials);
+        ftpClient = new FTPClient(credentials);
         directoryStack = new Stack<>();
     }
 
@@ -55,9 +55,9 @@ public final class RemoteMirror implements IMirror {
         System.out.println("Start reflecting...");
         validLocalDirectory();
         try {
-            if (ftpServer.connect()) {
+            if (ftpClient.connect()) {
                 reflectDir();
-                ftpServer.disconnect();
+                ftpClient.disconnect();
             } else {
                 throw new Exception("Can't stablish connection with server");
             }
@@ -78,9 +78,9 @@ public final class RemoteMirror implements IMirror {
                 List<File> localFiles = Arrays.asList(currentFile.listFiles());
                 if (!currentFile.equals(localDir)) {
                     String path = currentFile.getAbsolutePath().replace(localDir.getAbsolutePath(), "");
-                    ftpServer.changeDirectory(path);
+                    ftpClient.changeDirectory(path);
                 }
-                List<File> remoteFiles = ftpServer.getServerFiles();
+                List<File> remoteFiles = ftpClient.getServerFiles();
                 // iterates over the local directory comparing the files and adding or replacing it if necessary
                 localFiles.forEach((localFile) -> {
                     createFileOrDirectoryIfNecessary(localFile);
@@ -100,19 +100,19 @@ public final class RemoteMirror implements IMirror {
         try {
             String lastModifiedFile;
             if (localFile.isFile()) {
-                lastModifiedFile = ftpServer.lastModifiedFile(localFile);
+                lastModifiedFile = ftpClient.lastModifiedFile(localFile);
                 if (lastModifiedFile.isEmpty()) {
-                    ftpServer.createFile(localFile);
+                    ftpClient.createFile(localFile);
                 } else {
 //                    System.out.println("Local file modified at " + new Date(localFile.lastModified()));
 //                    System.out.println("Remote file modified at " + new Date(lastTimeModified(lastModifiedFile)));
                     if (localFile.lastModified() > lastTimeModified(lastModifiedFile)) {
-                        ftpServer.deleteFile(localFile);
-                        ftpServer.createFile(localFile);
+                        ftpClient.deleteFile(localFile);
+                        ftpClient.createFile(localFile);
                     }
                 }
             } else {
-                ftpServer.createDirectory(localFile);
+                ftpClient.createDirectory(localFile);
                 directoryStack.push(localFile);
             }
         } catch (IOException ex) {
@@ -126,8 +126,8 @@ public final class RemoteMirror implements IMirror {
         File possibleLocalFile = new File(localFile.getPath() + File.separator + remoteFile.getName());
         if (!possibleLocalFile.exists()) {
             try {
-                if (!ftpServer.deleteFile(remoteFile)) {
-                    ftpServer.removeDirectory(remoteFile);
+                if (!ftpClient.deleteFile(remoteFile)) {
+                    ftpClient.removeDirectory(remoteFile);
                 }
             } catch (Exception ex) {
                 Logger.getLogger(RemoteMirror.class.getName()).log(Level.SEVERE, null, ex);

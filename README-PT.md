@@ -67,7 +67,7 @@ LocalDateTime date = LocalDateTime.of(
 
 Fique a vontade para executar, testar, criar issues e enviar seus pull requests.
 
-ps* na classe FTPServer você pode alterar a constante ```DEBUG``` para ```true```, assim os comandos e respostas FTP serão exibidos no console.
+ps* na classe FTPClient você pode alterar a constante ```DEBUG``` para ```true```, assim os comandos e respostas FTP serão exibidos no console.
 
 ## Autores
 

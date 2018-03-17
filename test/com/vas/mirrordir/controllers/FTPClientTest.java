@@ -1,6 +1,6 @@
 package com.vas.mirrordir.controllers;
 
-import com.vas.mirrordir.ftp.FTPServer;
+import com.vas.mirrordir.ftp.FTPClient;
 import com.vas.mirrordir.models.FTPCredentials;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -13,9 +13,9 @@ import org.junit.Test;
  *
  * @author Vinícius
  */
-public class FTPServerTest {
+public class FTPClientTest {
     
-    private FTPServer ftpConn;
+    private FTPClient ftpConn;
     
     @BeforeClass
     public static void setUpClass() {    }
@@ -25,7 +25,7 @@ public class FTPServerTest {
     
     @Before
     public void setUp() throws Exception {
-        ftpConn = new FTPServer(new FTPCredentials("ftp.drivehq.com", "vinicius.vas.ti", "123456"));
+        ftpConn = new FTPClient(new FTPCredentials("ftp.drivehq.com", "vinicius.vas.ti", "123456"));
     }
     
     @After
